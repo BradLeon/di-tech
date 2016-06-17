@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sat Jun 11 10:40:07 2016
+Created on Sun May 29 00:59:52 2016
 
 @author: Leon
 """
-
 
 
 import numpy as np
@@ -39,7 +38,7 @@ def rfForFeature(X,y,features_list):
     feature_importance = 100.0 * (feature_importance / feature_importance.max())
     #print "Feature importances:\n", feature_importance
     #设置特征重要性的阈值为3
-    fi_threshold = 1
+    fi_threshold = 3
     #选择重要性大于阈值的特征
     important_idx = np.where(feature_importance > fi_threshold)[0]
     #print "Indices of most important features:\n", important_idx
@@ -182,7 +181,7 @@ def gbrtprediction2(train_X,train_y,test_X , valid_X, valid_y):
     #                 'C': [0.001, 0.01, 0.1, 1, 10, 100, 1000]}]
     mape_scorer = make_scorer(mape_loss ,greater_is_better = False)
                      
-    exp_parameters ={'learning_rate':0.001 ,  'n_estimators': 1400,\
+    exp_parameters ={'learning_rate':0.001 ,  'n_estimators': 2000,\
                         'max_depth':9, 'subsample': 0.7 ,'loss': 'huber'}
     
     print 'prams:' , exp_parameters
@@ -219,8 +218,8 @@ def gbrtprediction2(train_X,train_y,test_X , valid_X, valid_y):
     valid_mape = mape_loss(valid_y,new_valid_ypred)
     '''
     
-    #for i in range(len(valid_y)):
-    #    print 'pred y & true y:' , valid_ypred[i] , valid_y[i]
+    for i in range(len(valid_y)):
+        print 'pred y & true y:' , valid_ypred[i] , valid_y[i]
 
     
     valid_mape = mape_loss(valid_y,valid_ypred)
@@ -228,8 +227,10 @@ def gbrtprediction2(train_X,train_y,test_X , valid_X, valid_y):
     print ' the mape score in valid set is :' , valid_mape
     #预测
     result=gbrt.predict(test_X)
-    #store model
-    joblib.dump(gbrt,'gbrt_binary_normal.model')
+    joblib.dump(gbrt,'gbrt_up.model')
+    
+    submission = pd.DataFrame({'true gap': valid_y , 'pred_gap': valid_ypred}, columns=['true_gap','pred_gap'])
+    submission.to_csv("/home/lael/Documents/gbrt_biggap.csv",index=False)
     
     return result 
     
@@ -290,7 +291,7 @@ def LRprediction2(train_X,train_y,test_X,valid_X, valid_y):
 
 if __name__ == '__main__':
 
-    train=pd.read_csv('/home/lael/Documents/trainResult0611_binary.csv',header=0)
+    train=pd.read_csv('/home/lael/Documents/train_binary_downupSample11_2.csv',header=0)
    # validation=pd.read_csv('D:\\di_tech\\dataset\\season_1\\validation_Result.csv',header=0)
     test=pd.read_csv('/home/lael/Documents/testResult_season2_binary.csv',header=0)
     
@@ -315,8 +316,8 @@ if __name__ == '__main__':
     print 'step1:' ,datetime.now()
     
    
-    features_list = train.columns.values[4:]
-    important_idx,sorted_idx=gbdtForFeature(train_X,train_y,features_list)
+    #features_list = train.columns.values[4:]
+   # important_idx,sorted_idx=gbdtForFeature(train_X,train_y,features_list)
     #train_X = train_X[:, important_idx][:, sorted_idx];print(str(train_X.shape[1])+" features")
     #test_X = test_X[:, important_idx][:, sorted_idx]    
     
@@ -340,7 +341,9 @@ if __name__ == '__main__':
     print(type(result))
     #print(result)
     print 'step5:' , datetime.now()
-    
+
+
+    '''
     submission = pd.DataFrame({'pos':test.pos,'time':test.timeFrag,'gap':result}, columns=['pos','time','gap'])
-    submission.to_csv("/home/lael/Documents/submission_gbrt_binary11.csv",index=False)
-    
+    submission.to_csv("D:\\di_tech\\dataset\\season_1\\result\\submission_gbrt_biggap.csv",index=False)
+    '''
